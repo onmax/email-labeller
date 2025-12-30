@@ -1,0 +1,23 @@
+{
+  "name": "email-labeller",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.26.2",
+  "scripts": {
+    "dev": "pnpm --filter email-labeller-cli dev",
+    "auth": "pnpm --filter email-labeller-cli auth",
+    "backfill": "pnpm --filter email-labeller-cli backfill",
+    "cleanup": "pnpm --filter email-labeller-cli cleanup",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.13.3",
+    "eslint": "^9.28.0",
+    "eslint-plugin-format": "^1.1.0",
+    "typescript": "^5.9.3"
+  }
+}

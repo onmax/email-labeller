@@ -1,0 +1,24 @@
+{
+  "name": "email-labeller",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "AI-powered email classification for Gmail",
+  "author": "onmax",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/onmax/email-labeller" },
+  "keywords": ["email", "gmail", "ai", "classification", "labeller", "automation"],
+  "exports": { ".": "./dist/exports.js" },
+  "bin": { "email-labeller": "./dist/index.js" },
+  "files": ["dist"],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@email-labeller/ai-sdk": "workspace:*",
+    "@email-labeller/core": "workspace:*",
+    "@email-labeller/gmail": "workspace:*"
+  },
+  "devDependencies": { "@types/node": "^25.0.3", "tsx": "^4.21.0", "typescript": "^5.9.3" }
+}
