@@ -5,6 +5,7 @@ import { auth } from './commands/auth.js'
 import { backfill } from './commands/backfill.js'
 import { cleanup } from './commands/cleanup.js'
 import { listLabels } from './commands/list-labels.js'
+import { remove } from './commands/remove.js'
 import { run } from './commands/run.js'
 import { suggest } from './commands/suggest.js'
 import { getConfigPath } from './config.js'
@@ -39,9 +40,12 @@ async function main() {
     case 'labels':
       await listLabels(config)
       break
+    case 'remove':
+      await remove(config, args.slice(1))
+      break
     default:
       console.error(`Unknown command: ${command}`)
-      console.log('Available commands: run, backfill, cleanup, auth, suggest, labels')
+      console.log('Available commands: run, backfill, cleanup, auth, suggest, labels, remove')
       process.exit(1)
   }
 }
