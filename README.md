@@ -5,6 +5,7 @@ Email Labeller automatically classifies Gmail emails using AI. It applies labels
 ## Features
 
 - **Automatic classification**: Process new emails and apply labels based on AI analysis.
+- **Config suggestion**: Analyze your emails and auto-generate optimal labels and rules.
 - **Backfill**: Label historical emails in batches with optional force-relabel.
 - **Auto-cleanup**: Trash old emails based on configurable retention rules.
 - **Any AI provider**: Use Claude Code (subscription), Gemini, OpenAI, or Anthropic API.
@@ -84,6 +85,7 @@ npx email-labeller
 | ------------------------- | -------------------------------------------------- |
 | `email-labeller`          | Process new emails and apply labels                |
 | `email-labeller auth`     | Authenticate with Gmail                            |
+| `email-labeller suggest`  | Analyze emails and generate config suggestions     |
 | `email-labeller backfill` | Label historical emails (use `--force` to relabel) |
 | `email-labeller cleanup`  | Trash old emails based on retention rules          |
 

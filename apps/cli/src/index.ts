@@ -5,6 +5,7 @@ import { auth } from './commands/auth.js'
 import { backfill } from './commands/backfill.js'
 import { cleanup } from './commands/cleanup.js'
 import { run } from './commands/run.js'
+import { suggest } from './commands/suggest.js'
 import { getConfigPath } from './config.js'
 
 async function loadConfig(): Promise<Config> {
@@ -31,9 +32,12 @@ async function main() {
     case 'cleanup':
       await cleanup(config)
       break
+    case 'suggest':
+      await suggest(config, args.slice(1))
+      break
     default:
       console.error(`Unknown command: ${command}`)
-      console.log('Available commands: run, backfill, cleanup, auth')
+      console.log('Available commands: run, backfill, cleanup, auth, suggest')
       process.exit(1)
   }
 }
