@@ -6,14 +6,14 @@ export interface GetEmailsOptions {
 }
 
 export interface ClassificationResult {
-  label: string
+  labels: string[]
   confidence?: number
   reasoning?: string
 }
 
 export interface ProcessResult {
   processed: number
-  results: Array<{ emailId: string, label: string }>
+  results: Array<{ emailId: string, labels: string[] }>
 }
 
 export interface CleanupResult {

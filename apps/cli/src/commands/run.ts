@@ -22,7 +22,7 @@ export async function run(config: Config) {
     config,
     onProgress: (info) => {
       if (info.status === 'labeled')
-        console.log(`  [${info.label}] ${info.email.subject.slice(0, 50)}`)
+        console.log(`  [${info.labels?.join(', ')}] ${info.email.subject.slice(0, 50)}`)
       else if (info.status === 'error')
         console.error(`  ❌ Failed: ${info.email.subject.slice(0, 40)}`, info.error)
     },

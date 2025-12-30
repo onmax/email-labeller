@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { auth } from './commands/auth.js'
 import { backfill } from './commands/backfill.js'
 import { cleanup } from './commands/cleanup.js'
+import { listLabels } from './commands/list-labels.js'
 import { run } from './commands/run.js'
 import { suggest } from './commands/suggest.js'
 import { getConfigPath } from './config.js'
@@ -35,9 +36,12 @@ async function main() {
     case 'suggest':
       await suggest(config, args.slice(1))
       break
+    case 'labels':
+      await listLabels(config)
+      break
     default:
       console.error(`Unknown command: ${command}`)
-      console.log('Available commands: run, backfill, cleanup, auth, suggest')
+      console.log('Available commands: run, backfill, cleanup, auth, suggest, labels')
       process.exit(1)
   }
 }

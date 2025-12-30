@@ -10,14 +10,15 @@ export interface AIClassifierConfig {
 function buildPrompt(email: EmailSummary, labels: LabelDefinition[], systemPrompt?: string): string {
   const labelDescriptions = labels.map(l => `- ${l.name}: ${l.description}`).join('\n')
 
-  const basePrompt = `You are an email classifier. Given an email's subject, sender, and snippet, classify it into exactly ONE of these categories:
+  const basePrompt = `You are an email classifier. Given an email's subject, sender, and snippet, classify it into ONE OR MORE of these categories:
 
 ${labelDescriptions}
 
 Rules:
-- Return ONLY the label name in the "label" field
+- Return 1-3 labels that best describe this email
+- Use hierarchical labels when applicable (e.g., "GitHub/Nuxt" is more specific than "GitHub")
+- First label should be the most specific/relevant
 - If unsure, use "Low Priority"
-- Be precise and consistent
 `
 
   const fullPrompt = systemPrompt ? `${basePrompt}\n\nAdditional rules:\n${systemPrompt}` : basePrompt
@@ -42,7 +43,7 @@ export function createAIClassifier(config: AIClassifierConfig): AIClassifier {
       const labelNames = labels.map(l => l.name)
 
       const schema = z.object({
-        label: z.enum(labelNames as [string, ...string[]]),
+        labels: z.array(z.enum(labelNames as [string, ...string[]])).min(1).max(3).describe('1-3 labels, most specific first'),
         confidence: z.number().min(0).max(1).optional(),
         reasoning: z.string().optional(),
       })
@@ -55,7 +56,7 @@ export function createAIClassifier(config: AIClassifierConfig): AIClassifier {
       })
 
       return {
-        label: result.object.label,
+        labels: result.object.labels,
         confidence: result.object.confidence,
         reasoning: result.object.reasoning,
       }
@@ -70,7 +71,7 @@ export function createAIClassifier(config: AIClassifierConfig): AIClassifier {
         }
         catch (err) {
           console.error(`Failed to classify: ${email.subject}`, err)
-          results.set(email.id, { label: 'Low Priority' })
+          results.set(email.id, { labels: ['Low Priority'] })
         }
       }
       return results

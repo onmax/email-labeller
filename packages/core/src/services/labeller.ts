@@ -29,7 +29,7 @@ export interface ProgressInfo {
   current: number
   total: number
   email: { id: string, subject: string }
-  label?: string
+  labels?: string[]
   status: 'processing' | 'labeled' | 'skipped' | 'error'
   error?: Error
 }
@@ -48,7 +48,7 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
     ensureLabels,
 
     async processNewEmails({ maxResults = 50 } = {}) {
-      const labels = await ensureLabels()
+      const labelIdMap = await ensureLabels()
       const labelNames = config.labels.map(l => l.name)
 
       const allEmails = await emailProvider.getEmails({ maxResults, excludeLabels: labelNames })
@@ -63,12 +63,19 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
 
         try {
           const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
-          const labelId = labels.get(classification.label)
+          const appliedLabels: string[] = []
 
-          if (labelId) {
-            await emailProvider.applyLabel(email.id, labelId)
-            results.push({ emailId: email.id, label: classification.label })
-            onProgress?.({ current: i + 1, total: emails.length, email, label: classification.label, status: 'labeled' })
+          for (const labelName of classification.labels) {
+            const labelId = labelIdMap.get(labelName)
+            if (labelId) {
+              await emailProvider.applyLabel(email.id, labelId)
+              appliedLabels.push(labelName)
+            }
+          }
+
+          if (appliedLabels.length > 0) {
+            results.push({ emailId: email.id, labels: appliedLabels })
+            onProgress?.({ current: i + 1, total: emails.length, email, labels: appliedLabels, status: 'labeled' })
           }
           await stateStore.markProcessed([email.id])
         }
@@ -81,7 +88,7 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
     },
 
     async backfill({ maxResults = 250, query = 'in:inbox -label:SENT', force = false } = {}) {
-      const labels = await ensureLabels()
+      const labelIdMap = await ensureLabels()
       const allEmails = await emailProvider.getEmails({ maxResults, query })
 
       let emails = allEmails
@@ -98,7 +105,7 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
 
         try {
           if (!force) {
-            const alreadyLabeled = await emailProvider.hasLabels(email.id, [...labels.values()])
+            const alreadyLabeled = await emailProvider.hasLabels(email.id, [...labelIdMap.values()])
             if (alreadyLabeled) {
               await stateStore.markProcessed([email.id])
               onProgress?.({ current: i + 1, total: emails.length, email, status: 'skipped' })
@@ -107,12 +114,19 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
           }
 
           const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
-          const labelId = labels.get(classification.label)
+          const appliedLabels: string[] = []
 
-          if (labelId) {
-            await emailProvider.applyLabel(email.id, labelId)
-            results.push({ emailId: email.id, label: classification.label })
-            onProgress?.({ current: i + 1, total: emails.length, email, label: classification.label, status: 'labeled' })
+          for (const labelName of classification.labels) {
+            const labelId = labelIdMap.get(labelName)
+            if (labelId) {
+              await emailProvider.applyLabel(email.id, labelId)
+              appliedLabels.push(labelName)
+            }
+          }
+
+          if (appliedLabels.length > 0) {
+            results.push({ emailId: email.id, labels: appliedLabels })
+            onProgress?.({ current: i + 1, total: emails.length, email, labels: appliedLabels, status: 'labeled' })
           }
           await stateStore.markProcessed([email.id])
 

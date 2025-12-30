@@ -33,7 +33,7 @@ export async function backfill(config: Config, args: string[] = []) {
     onProgress: (info) => {
       const progress = `[${info.current}/${info.total}]`
       if (info.status === 'labeled') {
-        console.log(`${progress} ✅ [${info.label}] ${info.email.subject.slice(0, 40)}`)
+        console.log(`${progress} ✅ [${info.labels?.join(', ')}] ${info.email.subject.slice(0, 40)}`)
         labeled++
       }
       else if (info.status === 'skipped') {
