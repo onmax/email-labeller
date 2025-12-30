@@ -2,8 +2,18 @@
   "name": "@email-labeller/ai-sdk",
   "type": "module",
   "version": "0.0.1",
-  "exports": { ".": "./src/index.ts" },
-  "peerDependencies": { "@email-labeller/core": "workspace:*" },
-  "dependencies": { "ai": "^4.3.16", "zod": "^3.24.1" },
-  "devDependencies": { "@types/node": "^25.0.3", "typescript": "^5.9.3" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "@email-labeller/core": "workspace:*"
+  },
+  "dependencies": {
+    "ai": "^6.0.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
 }

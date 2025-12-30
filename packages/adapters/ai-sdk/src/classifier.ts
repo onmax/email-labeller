@@ -33,7 +33,7 @@ Classify this email.`
 }
 
 export function createAIClassifier(config: AIClassifierConfig): AIClassifier {
-  const { model, temperature = 0.3 } = config
+  const { model, temperature } = config
 
   return {
     name: 'ai-sdk',
@@ -51,7 +51,7 @@ export function createAIClassifier(config: AIClassifierConfig): AIClassifier {
         model,
         schema,
         prompt: buildPrompt(email, labels, systemPrompt),
-        temperature,
+        ...(temperature !== undefined && { temperature }),
       })
 
       return {
