@@ -50,12 +50,18 @@ export default defineConfig({
   labels: [
     { name: 'Work', color: { backgroundColor: '#fad165', textColor: '#000000' }, description: 'Job-related emails' },
     { name: 'Personal', color: { backgroundColor: '#b99aff', textColor: '#000000' }, description: 'Friends and family' },
-    { name: 'Newsletters', color: { backgroundColor: '#4a86e8', textColor: '#ffffff' }, description: 'Subscriptions and digests' },
+    { name: 'Newsletters', color: { backgroundColor: '#4a86e8', textColor: '#ffffff' }, description: 'Subscriptions and digests', keywords: ['digest', 'weekly', 'subscribe'] },
     { name: 'Low Priority', color: { backgroundColor: '#c2c2c2', textColor: '#000000' }, description: 'Promotions and marketing' },
   ],
 
   cleanupRules: [
     { label: 'Low Priority', retentionDays: 7 },
+  ],
+
+  autoTrashRules: [
+    { from: '*@marketing.example.com' },
+    { subjectRegex: /unsubscribe/i, olderThan: 3 },
+    { largerThan: '10mb', olderThan: 30 },
   ],
 
   classificationPrompt: `Classify emails based on sender and content:
@@ -74,7 +80,9 @@ Run the authentication flow to connect your Gmail account:
 npx email-labeller auth
 ```
 
-This opens your browser for OAuth authorization. After authenticating, process your emails:
+This opens your browser for OAuth authorization and creates `tokens.json` with your credentials. Add this file to `.gitignore` to avoid leaking credentials.
+
+After authenticating, process your emails. The CLI creates `state.json` to track processed email IDs:
 
 ```bash
 npx email-labeller
@@ -82,14 +90,30 @@ npx email-labeller
 
 ## Commands
 
-| Command                   | Description                                        |
-| ------------------------- | -------------------------------------------------- |
-| `email-labeller`          | Process new emails and apply labels                |
-| `email-labeller auth`     | Authenticate with Gmail                            |
-| `email-labeller labels`   | List your existing Gmail labels                    |
-| `email-labeller suggest`  | Analyze emails and generate config suggestions     |
-| `email-labeller backfill` | Label historical emails (use `--force` to relabel) |
-| `email-labeller cleanup`  | Trash old emails based on retention rules          |
+| Command | Options | Description |
+| ------- | ------- | ----------- |
+| `email-labeller` | | Process new emails and apply labels |
+| `email-labeller auth` | | Authenticate with Gmail |
+| `email-labeller labels` | | List your existing Gmail labels |
+| `email-labeller suggest` | `--max <n>` | Analyze emails and generate config suggestions |
+| `email-labeller backfill` | `<query>` `--force` `--batch <n>` | Label historical emails |
+| `email-labeller cleanup` | | Trash old emails based on retention rules |
+| `email-labeller remove` | `--older-than` `--label` `--from` `--subject` `--larger-than` `--unread` `--read` `--limit` `--dry-run` | Remove emails matching filters |
+
+### Remove Command
+
+The `remove` command deletes emails matching your filters. Use `--dry-run` to preview before deleting.
+
+```bash
+# Preview emails older than 30 days with "Promotions" label
+npx email-labeller remove --older-than 30 --label Promotions --dry-run
+
+# Delete large emails from a specific sender
+npx email-labeller remove --from newsletter@example.com --larger-than 5mb
+
+# Combine multiple filters
+npx email-labeller remove --older-than 7 --label "Low Priority" --unread --limit 50
+```
 
 ## AI Providers
 
