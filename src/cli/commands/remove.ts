@@ -1,8 +1,8 @@
 import type { EmailFilter } from '../../core/index.js'
-import { AuthError } from '../../core/index.js'
-import { buildGmailQuery, createGmailProvider } from '../../adapters/gmail/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
+import { buildGmailQuery, createGmailProvider } from '../../adapters/gmail/index.js'
+import { AuthError } from '../../core/index.js'
 import { loadTokens } from '../config.js'
 import { loadConfig } from '../utils.js'
 

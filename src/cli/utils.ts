@@ -1,5 +1,5 @@
-import type { Config } from '../core/index.js'
 import type { LanguageModel } from 'ai'
+import type { Config } from '../core/index.js'
 import { pathToFileURL } from 'node:url'
 import { ConfigError, configSchema } from '../core/index.js'
 import { getConfigPath } from './config.js'

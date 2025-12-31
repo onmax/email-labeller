@@ -1,7 +1,7 @@
 import type { AIClassifier, ClassificationResult, EmailSummary, LabelDefinition } from '../../core/index.js'
-import { ClassificationError } from '../../core/index.js'
 import { generateObject } from 'ai'
 import { z } from 'zod'
+import { ClassificationError } from '../../core/index.js'
 
 export interface AIClassifierConfig {
   model: Parameters<typeof generateObject>[0]['model']

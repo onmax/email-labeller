@@ -1,6 +1,6 @@
-import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
+import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { loadTokens } from '../config.js'
 import { loadConfig } from '../utils.js'
 

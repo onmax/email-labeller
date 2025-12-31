@@ -1,10 +1,10 @@
 import type { EmailSummary } from '../../core/index.js'
 import { readFileSync } from 'node:fs'
-import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { generateObject } from 'ai'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { z } from 'zod'
+import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { getTokensPath } from '../config.js'
 import { loadConfig } from '../utils.js'
 

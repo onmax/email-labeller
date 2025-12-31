@@ -1,6 +1,6 @@
-import { createGmailProvider, runAuthServer } from '../../adapters/gmail/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
+import { createGmailProvider, runAuthServer } from '../../adapters/gmail/index.js'
 import { saveTokens } from '../config.js'
 import { loadConfig } from '../utils.js'
 

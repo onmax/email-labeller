@@ -1,8 +1,8 @@
-import type { EmailProvider, EmailSummary, GetEmailsOptions, LabelDefinition } from '../../core/index.js'
-import { ProviderError } from '../../core/index.js'
 import type { OAuth2Client } from 'google-auth-library'
 import type { gmail_v1 } from 'googleapis'
+import type { EmailProvider, EmailSummary, GetEmailsOptions, LabelDefinition } from '../../core/index.js'
 import { google } from 'googleapis'
+import { ProviderError } from '../../core/index.js'
 
 export interface GmailTokens {
   access_token: string

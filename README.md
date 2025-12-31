@@ -90,15 +90,15 @@ npx email-labeller
 
 ## Commands
 
-| Command | Options | Description |
-| ------- | ------- | ----------- |
-| `email-labeller` | | Process new emails and apply labels |
-| `email-labeller auth` | | Authenticate with Gmail |
-| `email-labeller labels` | | List your existing Gmail labels |
-| `email-labeller suggest` | `--max <n>` | Analyze emails and generate config suggestions |
-| `email-labeller backfill` | `<query>` `--force` `--batch <n>` | Label historical emails |
-| `email-labeller cleanup` | | Trash old emails based on retention rules |
-| `email-labeller remove` | `--older-than` `--label` `--from` `--subject` `--larger-than` `--unread` `--read` `--limit` `--dry-run` | Remove emails matching filters |
+| Command                   | Options                                                                                                 | Description                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `email-labeller`          |                                                                                                         | Process new emails and apply labels            |
+| `email-labeller auth`     |                                                                                                         | Authenticate with Gmail                        |
+| `email-labeller labels`   |                                                                                                         | List your existing Gmail labels                |
+| `email-labeller suggest`  | `--max <n>`                                                                                             | Analyze emails and generate config suggestions |
+| `email-labeller backfill` | `<query>` `--force` `--batch <n>`                                                                       | Label historical emails                        |
+| `email-labeller cleanup`  |                                                                                                         | Trash old emails based on retention rules      |
+| `email-labeller remove`   | `--older-than` `--label` `--from` `--subject` `--larger-than` `--unread` `--read` `--limit` `--dry-run` | Remove emails matching filters                 |
 
 ### Remove Command
 
