@@ -2,6 +2,7 @@
   "name": "email-labeller",
   "type": "module",
   "version": "0.2.1-alpha.1",
+  "packageManager": "pnpm@10.0.0",
   "description": "AI-powered email classification for Gmail",
   "author": "onmax",
   "license": "MIT",
