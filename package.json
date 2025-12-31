@@ -33,7 +33,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
-    "release": "changelogen --release --push && pnpm publish --access public",
+    "release": "bumpp && git push --follow-tags",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
