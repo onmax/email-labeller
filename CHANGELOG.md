@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.2.1-alpha.2
+
+[compare changes](https://github.com/onmax/email-labeller/compare/v0.2.1-alpha.1...v0.2.1-alpha.2)
+
+### 🩹 Fixes
+
+- Add packageManager field ([78e6076](https://github.com/onmax/email-labeller/commit/78e6076))
+
+### ❤️ Contributors
+
+- Onmax <maximogarciamtnez@gmail.com>
+
 ## v0.2.1-alpha.1
 
 
