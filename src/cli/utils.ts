@@ -1,7 +1,7 @@
-import type { Config } from '@email-labeller/core'
+import type { Config } from '../core/index.js'
 import type { LanguageModel } from 'ai'
 import { pathToFileURL } from 'node:url'
-import { ConfigError, configSchema } from '@email-labeller/core'
+import { ConfigError, configSchema } from '../core/index.js'
 import { getConfigPath } from './config.js'
 
 export async function loadConfig(): Promise<Config<LanguageModel>> {

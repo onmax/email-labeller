@@ -9,7 +9,7 @@ import run from './commands/run.js'
 import suggest from './commands/suggest.js'
 
 const main = defineCommand({
-  meta: { name: 'email-labeller', version: '0.1.0', description: 'AI-powered email classification for Gmail' },
+  meta: { name: 'email-labeller', version: '0.2.0', description: 'AI-powered email classification for Gmail' },
   subCommands: { run, auth, backfill, cleanup, suggest, labels, remove },
 })
 

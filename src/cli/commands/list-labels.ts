@@ -1,4 +1,4 @@
-import { createGmailProvider } from '@email-labeller/gmail'
+import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { loadTokens } from '../config.js'

@@ -10,6 +10,9 @@
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
-  }
+    "noUnusedParameters": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"]
 }

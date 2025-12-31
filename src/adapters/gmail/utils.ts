@@ -1,4 +1,4 @@
-import type { EmailFilter } from '@email-labeller/core'
+import type { EmailFilter } from '../../core/index.js'
 
 export function parseSize(size: string): number {
   if (!size || typeof size !== 'string')

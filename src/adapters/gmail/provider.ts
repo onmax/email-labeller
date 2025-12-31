@@ -1,5 +1,5 @@
-import type { EmailProvider, EmailSummary, GetEmailsOptions, LabelDefinition } from '@email-labeller/core'
-import { ProviderError } from '@email-labeller/core'
+import type { EmailProvider, EmailSummary, GetEmailsOptions, LabelDefinition } from '../../core/index.js'
+import { ProviderError } from '../../core/index.js'
 import type { OAuth2Client } from 'google-auth-library'
 import type { gmail_v1 } from 'googleapis'
 import { google } from 'googleapis'

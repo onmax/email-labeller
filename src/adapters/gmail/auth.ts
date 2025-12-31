@@ -2,7 +2,7 @@ import type { OAuth2Client } from 'google-auth-library'
 import type { GmailTokens } from './provider.js'
 import http from 'node:http'
 import { URL } from 'node:url'
-import { AuthError } from '@email-labeller/core'
+import { AuthError } from '../../core/index.js'
 
 export interface AuthCallbackResult {
   tokens: GmailTokens

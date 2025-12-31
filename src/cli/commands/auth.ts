@@ -1,4 +1,4 @@
-import { createGmailProvider, runAuthServer } from '@email-labeller/gmail'
+import { createGmailProvider, runAuthServer } from '../../adapters/gmail/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { saveTokens } from '../config.js'

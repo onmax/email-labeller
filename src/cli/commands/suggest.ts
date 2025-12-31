@@ -1,6 +1,6 @@
-import type { EmailSummary } from '@email-labeller/core'
+import type { EmailSummary } from '../../core/index.js'
 import { readFileSync } from 'node:fs'
-import { createGmailProvider } from '@email-labeller/gmail'
+import { createGmailProvider } from '../../adapters/gmail/index.js'
 import { generateObject } from 'ai'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'

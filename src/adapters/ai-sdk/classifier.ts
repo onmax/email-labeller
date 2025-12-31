@@ -1,5 +1,5 @@
-import type { AIClassifier, ClassificationResult, EmailSummary, LabelDefinition } from '@email-labeller/core'
-import { ClassificationError } from '@email-labeller/core'
+import type { AIClassifier, ClassificationResult, EmailSummary, LabelDefinition } from '../../core/index.js'
+import { ClassificationError } from '../../core/index.js'
 import { generateObject } from 'ai'
 import { z } from 'zod'
 

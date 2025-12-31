@@ -1,10 +1,10 @@
-import type { Config } from '@email-labeller/core'
-import type { GmailTokens } from '@email-labeller/gmail'
+import type { Config } from '../core/index.js'
+import type { GmailTokens } from '../adapters/gmail/index.js'
 import type { LanguageModel } from 'ai'
 import fs from 'node:fs'
-import { createAIClassifier } from '@email-labeller/ai-sdk'
-import { AuthError, createEmailLabeller, createFileStateStore } from '@email-labeller/core'
-import { createGmailProvider } from '@email-labeller/gmail'
+import { createAIClassifier } from '../adapters/ai-sdk/index.js'
+import { AuthError, createEmailLabeller, createFileStateStore } from '../core/index.js'
+import { createGmailProvider } from '../adapters/gmail/index.js'
 import { dirname, join } from 'pathe'
 
 const CWD = process.cwd()
