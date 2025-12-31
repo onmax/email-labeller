@@ -12,7 +12,8 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r exec tsc --noEmit",
     "lint": "eslint . --cache",
-    "lint:fix": "eslint . --fix --cache"
+    "lint:fix": "eslint . --fix --cache",
+    "release": "bumpp --commit --push --tag"
   },
   "dependencies": {
     "consola": "^3.4.2",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.3",
+    "bumpp": "^10.3.2",
     "eslint": "^9.28.0",
     "eslint-plugin-format": "^1.1.0",
     "typescript": "^5.9.3"

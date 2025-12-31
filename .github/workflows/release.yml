@@ -1,28 +1,48 @@
-name: Release
+name: release
+
+permissions:
+  id-token: write
+  contents: write
+  actions: read
 
 on:
   push:
     tags: ['v*']
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
+  wait-for-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for CI to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: ci
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
   release:
+    needs: wait-for-ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm typecheck
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: pnpm install
       - run: pnpm build
+
+      - name: GitHub Release
+        run: pnpm dlx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to npm
         run: npm publish --provenance --access public
         working-directory: apps/cli
