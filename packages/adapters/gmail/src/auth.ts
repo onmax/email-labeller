@@ -2,6 +2,7 @@ import type { OAuth2Client } from 'google-auth-library'
 import type { GmailTokens } from './provider.js'
 import http from 'node:http'
 import { URL } from 'node:url'
+import { AuthError } from '@email-labeller/core'
 
 export interface AuthCallbackResult {
   tokens: GmailTokens
@@ -39,7 +40,7 @@ export function runAuthServer(oauth2Client: OAuth2Client, port = 3000): Promise<
         res.writeHead(500)
         res.end('Authentication failed')
         server.close()
-        reject(err)
+        reject(new AuthError('Gmail token exchange failed', err instanceof Error ? err : new Error(String(err))))
       }
     })
 

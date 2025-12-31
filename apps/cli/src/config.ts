@@ -1,19 +1,17 @@
+import type { Config } from '@email-labeller/core'
 import type { GmailTokens } from '@email-labeller/gmail'
+import type { LanguageModel } from 'ai'
 import fs from 'node:fs'
-import path from 'node:path'
+import { createAIClassifier } from '@email-labeller/ai-sdk'
+import { AuthError, createEmailLabeller, createFileStateStore } from '@email-labeller/core'
+import { createGmailProvider } from '@email-labeller/gmail'
+import { dirname, join } from 'pathe'
 
-// Read from current working directory (where user runs the CLI)
 const CWD = process.cwd()
 
-export function getTokensPath(): string {
-  return path.join(CWD, 'tokens.json')
-}
-export function getStatePath(): string {
-  return path.join(CWD, 'state.json')
-}
-export function getConfigPath(): string {
-  return path.join(CWD, 'email-labeller.config.ts')
-}
+export const getTokensPath = () => join(CWD, 'tokens.json')
+export const getStatePath = () => join(CWD, 'state.json')
+export const getConfigPath = () => join(CWD, 'email-labeller.config.ts')
 
 export function loadTokens(): GmailTokens | null {
   const tokensPath = getTokensPath()
@@ -24,6 +22,20 @@ export function loadTokens(): GmailTokens | null {
 
 export function saveTokens(tokens: GmailTokens): void {
   const tokensPath = getTokensPath()
-  fs.mkdirSync(path.dirname(tokensPath), { recursive: true })
+  fs.mkdirSync(dirname(tokensPath), { recursive: true })
   fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2))
+}
+
+export function createLabeller(config: Config<LanguageModel>, onProgress?: Parameters<typeof createEmailLabeller>[0]['onProgress']) {
+  const tokens = loadTokens()
+  if (!tokens)
+    throw new AuthError('No tokens found. Run `email-labeller auth` first.')
+
+  return createEmailLabeller({
+    emailProvider: createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens }),
+    aiClassifier: createAIClassifier({ model: config.model }),
+    stateStore: createFileStateStore({ path: getStatePath() }),
+    config,
+    onProgress,
+  })
 }

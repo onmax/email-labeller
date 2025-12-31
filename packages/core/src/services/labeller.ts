@@ -2,7 +2,9 @@ import type { Config } from '../config/schema.js'
 import type { AIClassifier } from '../interfaces/ai-classifier.js'
 import type { EmailProvider } from '../interfaces/email-provider.js'
 import type { StateStore } from '../interfaces/state-store.js'
+import type { EmailSummary } from '../types/email.js'
 import type { CleanupResult, ProcessResult } from '../types/index.js'
+import { matchesFilter } from '../utils/filter.js'
 
 export interface EmailLabeller {
   processNewEmails: (options?: { maxResults?: number }) => Promise<ProcessResult>
@@ -30,7 +32,7 @@ export interface ProgressInfo {
   total: number
   email: { id: string, subject: string }
   labels?: string[]
-  status: 'processing' | 'labeled' | 'skipped' | 'error'
+  status: 'processing' | 'labeled' | 'skipped' | 'trashed' | 'error'
   error?: Error
 }
 
@@ -38,10 +40,67 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
   const { emailProvider, aiClassifier, stateStore, config, onProgress } = options
   let labelMap: Map<string, string> | null = null
 
+  function progress(info: ProgressInfo): void {
+    try {
+      onProgress?.(info)
+    }
+    catch { /* ignore callback errors */ }
+  }
+
   async function ensureLabels(): Promise<Map<string, string>> {
     if (!labelMap)
       labelMap = await emailProvider.ensureLabelsExist(config.labels)
     return labelMap
+  }
+
+  function shouldAutoTrash(email: EmailSummary): boolean {
+    if (!config.autoTrashRules?.length)
+      return false
+    return config.autoTrashRules.some(rule => matchesFilter(email, rule))
+  }
+
+  async function applyLabels(emailId: string, labelNames: string[], labelIdMap: Map<string, string>): Promise<string[]> {
+    const applied: string[] = []
+    for (const name of labelNames) {
+      const id = labelIdMap.get(name)
+      if (id) {
+        await emailProvider.applyLabel(emailId, id)
+        applied.push(name)
+      }
+    }
+    return applied
+  }
+
+  interface ProcessContext { current: number, total: number, labelIdMap: Map<string, string>, results: ProcessResult['results'], throttle?: boolean }
+
+  async function processEmail(email: EmailSummary, ctx: ProcessContext): Promise<boolean> {
+    progress({ current: ctx.current, total: ctx.total, email, status: 'processing' })
+
+    try {
+      const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
+      const appliedLabels = await applyLabels(email.id, classification.labels, ctx.labelIdMap)
+
+      if (appliedLabels.length > 0) {
+        ctx.results.push({ emailId: email.id, labels: appliedLabels })
+        progress({ current: ctx.current, total: ctx.total, email, labels: appliedLabels, status: 'labeled' })
+      }
+
+      await stateStore.markProcessed([email.id])
+
+      if (shouldAutoTrash(email)) {
+        await emailProvider.trashEmail(email.id)
+        progress({ current: ctx.current, total: ctx.total, email, labels: appliedLabels, status: 'trashed' })
+      }
+
+      if (ctx.throttle && ctx.current % 10 === 0)
+        await new Promise(r => setTimeout(r, 500))
+
+      return true
+    }
+    catch (err) {
+      progress({ current: ctx.current, total: ctx.total, email, status: 'error', error: err as Error })
+      return false
+    }
   }
 
   return {
@@ -56,33 +115,8 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
       const emails = allEmails.filter(e => unprocessedIds.includes(e.id))
 
       const results: ProcessResult['results'] = []
-
-      for (let i = 0; i < emails.length; i++) {
-        const email = emails[i]
-        onProgress?.({ current: i + 1, total: emails.length, email, status: 'processing' })
-
-        try {
-          const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
-          const appliedLabels: string[] = []
-
-          for (const labelName of classification.labels) {
-            const labelId = labelIdMap.get(labelName)
-            if (labelId) {
-              await emailProvider.applyLabel(email.id, labelId)
-              appliedLabels.push(labelName)
-            }
-          }
-
-          if (appliedLabels.length > 0) {
-            results.push({ emailId: email.id, labels: appliedLabels })
-            onProgress?.({ current: i + 1, total: emails.length, email, labels: appliedLabels, status: 'labeled' })
-          }
-          await stateStore.markProcessed([email.id])
-        }
-        catch (err) {
-          onProgress?.({ current: i + 1, total: emails.length, email, status: 'error', error: err as Error })
-        }
-      }
+      for (const [i, email] of emails.entries())
+        await processEmail(email, { current: i + 1, total: emails.length, labelIdMap, results, throttle: true })
 
       return { processed: results.length, results }
     },
@@ -98,44 +132,17 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
       }
 
       const results: ProcessResult['results'] = []
-
-      for (let i = 0; i < emails.length; i++) {
-        const email = emails[i]
-        onProgress?.({ current: i + 1, total: emails.length, email, status: 'processing' })
-
-        try {
-          if (!force) {
-            const alreadyLabeled = await emailProvider.hasLabels(email.id, [...labelIdMap.values()])
-            if (alreadyLabeled) {
-              await stateStore.markProcessed([email.id])
-              onProgress?.({ current: i + 1, total: emails.length, email, status: 'skipped' })
-              continue
-            }
+      for (const [i, email] of emails.entries()) {
+        if (!force) {
+          const alreadyLabeled = await emailProvider.hasLabels(email.id, [...labelIdMap.values()])
+          if (alreadyLabeled) {
+            await stateStore.markProcessed([email.id])
+            progress({ current: i + 1, total: emails.length, email, status: 'skipped' })
+            continue
           }
-
-          const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
-          const appliedLabels: string[] = []
-
-          for (const labelName of classification.labels) {
-            const labelId = labelIdMap.get(labelName)
-            if (labelId) {
-              await emailProvider.applyLabel(email.id, labelId)
-              appliedLabels.push(labelName)
-            }
-          }
-
-          if (appliedLabels.length > 0) {
-            results.push({ emailId: email.id, labels: appliedLabels })
-            onProgress?.({ current: i + 1, total: emails.length, email, labels: appliedLabels, status: 'labeled' })
-          }
-          await stateStore.markProcessed([email.id])
-
-          if (i % 10 === 9)
-            await new Promise(r => setTimeout(r, 500))
         }
-        catch (err) {
-          onProgress?.({ current: i + 1, total: emails.length, email, status: 'error', error: err as Error })
-        }
+
+        await processEmail(email, { current: i + 1, total: emails.length, labelIdMap, results, throttle: true })
       }
 
       return { processed: results.length, results }
@@ -155,7 +162,7 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
 
         const cutoffDate = new Date()
         cutoffDate.setDate(cutoffDate.getDate() - rule.retentionDays)
-        const beforeDate = cutoffDate.toISOString().split('T')[0].replace(/-/g, '/')
+        const beforeDate = cutoffDate.toISOString().slice(0, 10).replace(/-/g, '/')
         const query = `label:${rule.label.replace(/\//g, '-').replace(/ /g, '-')} before:${beforeDate}`
 
         const emails = await emailProvider.getEmails({ maxResults: 100, query })

@@ -36,6 +36,9 @@
     "@email-labeller/core": "workspace:*",
     "@email-labeller/gmail": "workspace:*",
     "ai": "^6.0.5",
+    "citty": "^0.1.6",
+    "consola": "^3.4.2",
+    "pathe": "^2.0.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {

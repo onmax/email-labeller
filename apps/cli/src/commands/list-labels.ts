@@ -1,22 +1,27 @@
-import type { Config } from '@email-labeller/core'
 import { createGmailProvider } from '@email-labeller/gmail'
+import { defineCommand } from 'citty'
+import { consola } from 'consola'
 import { loadTokens } from '../config.js'
+import { loadConfig } from '../utils.js'
 
 const SYSTEM_LABELS = ['INBOX', 'SENT', 'DRAFT', 'TRASH', 'SPAM', 'STARRED', 'UNREAD', 'IMPORTANT', 'CHAT', 'YELLOW_STAR']
 
-export async function listLabels(config: Config) {
-  const tokens = loadTokens()
-  if (!tokens)
-    throw new Error('No tokens found. Run `email-labeller auth` first.')
+export default defineCommand({
+  meta: { name: 'labels', description: 'List all Gmail labels' },
+  async run() {
+    const config = await loadConfig()
+    const tokens = loadTokens()
+    if (!tokens)
+      throw new Error('No tokens found. Run `email-labeller auth` first.')
 
-  const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    const labels = await emailProvider.listLabels()
+    const userLabels = labels.filter(l => !l.name.startsWith('CATEGORY_') && !SYSTEM_LABELS.includes(l.name))
 
-  const labels = await emailProvider.listLabels()
-  const userLabels = labels.filter(l => !l.name.startsWith('CATEGORY_') && !SYSTEM_LABELS.includes(l.name))
-
-  console.log('\n📋 Your Gmail Labels:\n')
-  for (const label of userLabels.sort((a, b) => a.name.localeCompare(b.name))) {
-    console.log(`  ${label.name}`)
-  }
-  console.log(`\n   Total: ${userLabels.length} labels\n`)
-}
+    consola.info('Your Gmail Labels:')
+    for (const label of userLabels.sort((a, b) => a.name.localeCompare(b.name))) {
+      consola.log(`  ${label.name}`)
+    }
+    consola.info(`Total: ${userLabels.length} labels`)
+  },
+})

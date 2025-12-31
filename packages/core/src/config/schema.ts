@@ -1,4 +1,3 @@
-import type { LanguageModelV1 } from 'ai'
 import { z } from 'zod'
 
 export const labelColorSchema = z.object({
@@ -18,14 +17,44 @@ export const cleanupRuleSchema = z.object({
   retentionDays: z.number().positive(),
 })
 
-// Runtime config type (not Zod - model is a runtime object)
-export interface Config {
-  model: LanguageModelV1
-  gmail: { clientId: string, clientSecret: string }
-  labels: Array<{ name: string, description: string, color: { backgroundColor: string, textColor: string }, keywords?: string[] }>
-  cleanupRules?: Array<{ label: string, retentionDays: number }>
+export const emailFilterSchema = z.object({
+  olderThan: z.number().positive().optional(),
+  labels: z.array(z.string()).optional(),
+  largerThan: z.string().optional(),
+  from: z.string().optional(),
+  subject: z.string().optional(),
+  subjectRegex: z.instanceof(RegExp).optional(),
+  snippetRegex: z.instanceof(RegExp).optional(),
+  unread: z.boolean().optional(),
+  read: z.boolean().optional(),
+})
+
+export const coreConfigSchema = z.object({
+  labels: z.array(labelSchema).min(1),
+  cleanupRules: z.array(cleanupRuleSchema).optional(),
+  autoTrashRules: z.array(emailFilterSchema).optional(),
+  classificationPrompt: z.string().optional(),
+})
+
+export const configSchema = coreConfigSchema.extend({
+  model: z.unknown(),
+  gmail: z.object({ clientId: z.string(), clientSecret: z.string() }),
+})
+
+// Core config - provider-agnostic
+export interface CoreConfig {
+  labels: LabelConfig[]
+  cleanupRules?: CleanupRule[]
+  autoTrashRules?: EmailFilter[]
   classificationPrompt?: string
+}
+
+// Full config with provider settings (used by CLI)
+export interface Config<TModel = unknown> extends CoreConfig {
+  model: TModel
+  gmail: { clientId: string, clientSecret: string }
 }
 
 export type LabelConfig = z.infer<typeof labelSchema>
 export type CleanupRule = z.infer<typeof cleanupRuleSchema>
+export type EmailFilter = z.infer<typeof emailFilterSchema>

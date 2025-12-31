@@ -1,33 +1,22 @@
-import type { Config } from '@email-labeller/core'
-import { createAIClassifier } from '@email-labeller/ai-sdk'
-import { createEmailLabeller, createFileStateStore } from '@email-labeller/core'
-import { createGmailProvider } from '@email-labeller/gmail'
-import { getStatePath, loadTokens } from '../config.js'
+import { defineCommand } from 'citty'
+import { consola } from 'consola'
+import { createLabeller } from '../config.js'
+import { loadConfig } from '../utils.js'
 
-export async function cleanup(config: Config) {
-  console.log('\n🧹 Email Cleanup\n')
+export default defineCommand({
+  meta: { name: 'cleanup', description: 'Clean up old emails based on retention rules' },
+  async run() {
+    const config = await loadConfig()
+    const labeller = createLabeller(config)
 
-  const tokens = loadTokens()
-  if (!tokens)
-    throw new Error('No tokens found. Run `email-labeller auth` first.')
+    consola.start('Running cleanup...')
+    const result = await labeller.cleanup()
 
-  const labeller = createEmailLabeller({
-    emailProvider: createGmailProvider({
-      clientId: config.gmail.clientId,
-      clientSecret: config.gmail.clientSecret,
-      tokens,
-    }),
-    aiClassifier: createAIClassifier({ model: config.model }),
-    stateStore: createFileStateStore({ path: getStatePath() }),
-    config,
-  })
+    for (const [label, count] of Object.entries(result.byLabel)) {
+      if (count > 0)
+        consola.info(`${label}: trashed ${count} emails`)
+    }
 
-  const result = await labeller.cleanup()
-
-  for (const [label, count] of Object.entries(result.byLabel)) {
-    if (count > 0)
-      console.log(`   ${label}: trashed ${count} emails`)
-  }
-
-  console.log(`\n🧹 Done! Trashed ${result.deleted} emails total\n`)
-}
+    consola.success(`Done! Trashed ${result.deleted} emails total`)
+  },
+})

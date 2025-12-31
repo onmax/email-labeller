@@ -1,56 +1,46 @@
-import type { Config } from '@email-labeller/core'
-import { createAIClassifier } from '@email-labeller/ai-sdk'
-import { createEmailLabeller, createFileStateStore } from '@email-labeller/core'
-import { createGmailProvider } from '@email-labeller/gmail'
-import { getStatePath, loadTokens } from '../config.js'
+import { defineCommand } from 'citty'
+import { consola } from 'consola'
+import { createLabeller } from '../config.js'
+import { loadConfig } from '../utils.js'
 
-export async function backfill(config: Config, args: string[] = []) {
-  const FORCE = args.includes('--force')
-  const QUERY = args.find(a => !a.startsWith('--')) || 'in:inbox -label:SENT'
-  const BATCH_SIZE = 250
+export default defineCommand({
+  meta: { name: 'backfill', description: 'Backfill labels for existing emails' },
+  args: {
+    query: { type: 'positional', description: 'Gmail query filter', default: 'in:inbox -label:SENT' },
+    force: { type: 'boolean', description: 'Re-label already labeled emails' },
+    batch: { type: 'string', description: 'Batch size', default: '250' },
+  },
+  async run({ args }) {
+    const config = await loadConfig()
+    const batchSize = Number.parseInt(args.batch)
+    consola.info(`Query: ${args.query}`)
+    consola.info(`Batch: ${batchSize}`)
+    consola.info(`Force: ${args.force}`)
 
-  console.log(`\n📧 Email Labeller - Backfill\n`)
-  console.log(`   Query: ${QUERY}`)
-  console.log(`   Batch: ${BATCH_SIZE}`)
-  console.log(`   Force: ${FORCE}\n`)
+    let labeled = 0
+    let skipped = 0
 
-  const tokens = loadTokens()
-  if (!tokens)
-    throw new Error('No tokens found. Run `email-labeller auth` first.')
-
-  let labeled = 0
-  let skipped = 0
-
-  const labeller = createEmailLabeller({
-    emailProvider: createGmailProvider({
-      clientId: config.gmail.clientId,
-      clientSecret: config.gmail.clientSecret,
-      tokens,
-    }),
-    aiClassifier: createAIClassifier({ model: config.model }),
-    stateStore: createFileStateStore({ path: getStatePath() }),
-    config,
-    onProgress: (info) => {
+    const labeller = createLabeller(config, (info) => {
       const progress = `[${info.current}/${info.total}]`
       if (info.status === 'labeled') {
-        console.log(`${progress} ✅ [${info.labels?.join(', ')}] ${info.email.subject.slice(0, 40)}`)
+        consola.success(`${progress} [${info.labels?.join(', ')}] ${info.email.subject.slice(0, 40)}`)
         labeled++
       }
       else if (info.status === 'skipped') {
-        console.log(`${progress} ⏭️  Already labeled: ${info.email.subject.slice(0, 40)}`)
+        consola.log(`${progress} Skipped: ${info.email.subject.slice(0, 40)}`)
         skipped++
       }
       else if (info.status === 'error') {
-        console.error(`${progress} ❌ Failed: ${info.email.subject.slice(0, 40)}`, info.error)
+        consola.error(`${progress} Failed: ${info.email.subject.slice(0, 40)}`, info.error)
       }
-    },
-  })
+    })
 
-  console.log('📋 Checking labels...')
-  const labelMap = await labeller.ensureLabels()
-  console.log(`   ${labelMap.size} labels ready\n`)
+    consola.start('Checking labels...')
+    const labelMap = await labeller.ensureLabels()
+    consola.info(`${labelMap.size} labels ready`)
 
-  console.log('🤖 Classifying and labeling...\n')
-  await labeller.backfill({ maxResults: BATCH_SIZE, query: QUERY, force: FORCE })
-  console.log(`\n✅ Done! Labeled: ${labeled}, Skipped: ${skipped}\n`)
-}
+    consola.start('Classifying and labeling...')
+    await labeller.backfill({ maxResults: batchSize, query: args.query, force: args.force })
+    consola.success(`Done! Labeled: ${labeled}, Skipped: ${skipped}`)
+  },
+})

@@ -1,9 +1,12 @@
-import type { Config, EmailSummary } from '@email-labeller/core'
+import type { EmailSummary } from '@email-labeller/core'
+import { readFileSync } from 'node:fs'
 import { createGmailProvider } from '@email-labeller/gmail'
 import { generateObject } from 'ai'
-import { readFileSync } from 'node:fs'
+import { defineCommand } from 'citty'
+import { consola } from 'consola'
 import { z } from 'zod'
 import { getTokensPath } from '../config.js'
+import { loadConfig } from '../utils.js'
 
 const SuggestedConfigSchema = z.object({
   labels: z.array(z.object({
@@ -25,21 +28,25 @@ function summarizeEmails(emails: EmailSummary[]): string {
   return emails.map((e, i) => `${i + 1}. From: ${e.from}\n   Subject: ${e.subject}\n   Preview: ${e.snippet?.slice(0, 100)}`).join('\n\n')
 }
 
-export async function suggest(config: Config, args: string[]) {
-  const maxEmails = Number.parseInt(args.find(a => a.startsWith('--max='))?.split('=')[1] || '200')
+export default defineCommand({
+  meta: { name: 'suggest', description: 'Suggest label configuration based on email patterns' },
+  args: {
+    max: { type: 'string', description: 'Max emails to analyze', default: '200' },
+  },
+  async run({ args }) {
+    const config = await loadConfig()
+    const maxEmails = Number.parseInt(args.max)
 
-  console.log('\n🔍 Email Labeller - Config Suggestion\n')
+    const tokens = JSON.parse(readFileSync(getTokensPath(), 'utf-8'))
+    const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
 
-  const tokens = JSON.parse(readFileSync(getTokensPath(), 'utf-8'))
-  const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    consola.start(`Fetching last ${maxEmails} emails...`)
+    const emails = await emailProvider.getEmails({ maxResults: maxEmails, query: 'in:inbox' })
+    consola.info(`Found ${emails.length} emails`)
 
-  console.log(`📧 Fetching last ${maxEmails} emails...`)
-  const emails = await emailProvider.getEmails({ maxResults: maxEmails, query: 'in:inbox' })
-  console.log(`   Found ${emails.length} emails\n`)
+    consola.start('Analyzing email patterns...')
 
-  console.log('🤖 Analyzing email patterns...\n')
-
-  const prompt = `Analyze these ${emails.length} emails and suggest an optimal configuration for automatic email labeling.
+    const prompt = `Analyze these ${emails.length} emails and suggest an optimal configuration for automatic email labeling.
 
 Goals:
 - Create 5-8 distinct labels that cover all email types
@@ -53,26 +60,23 @@ ${summarizeEmails(emails)}
 
 Generate a minimal, practical configuration.`
 
-  const result = await generateObject({
-    model: config.model,
-    schema: SuggestedConfigSchema,
-    prompt,
-  })
+    const result = await generateObject({ model: config.model, schema: SuggestedConfigSchema, prompt })
 
-  console.log('📋 Suggested Configuration:\n')
-  console.log('```typescript')
-  console.log(`labels: [`)
-  for (const label of result.object.labels) {
-    console.log(`  { name: '${label.name}', color: { backgroundColor: '${label.color.backgroundColor}', textColor: '${label.color.textColor}' }, description: '${label.description}' },`)
-  }
-  console.log(`],\n`)
-  console.log(`cleanupRules: [`)
-  for (const rule of result.object.cleanupRules) {
-    console.log(`  { label: '${rule.label}', retentionDays: ${rule.retentionDays} },`)
-  }
-  console.log(`],\n`)
-  console.log(`classificationPrompt: \`${result.object.classificationPrompt}\`,`)
-  console.log('```\n')
+    consola.info('Suggested Configuration:')
+    consola.log('```typescript')
+    consola.log(`labels: [`)
+    for (const label of result.object.labels) {
+      consola.log(`  { name: '${label.name}', color: { backgroundColor: '${label.color.backgroundColor}', textColor: '${label.color.textColor}' }, description: '${label.description}' },`)
+    }
+    consola.log(`],\n`)
+    consola.log(`cleanupRules: [`)
+    for (const rule of result.object.cleanupRules) {
+      consola.log(`  { label: '${rule.label}', retentionDays: ${rule.retentionDays} },`)
+    }
+    consola.log(`],\n`)
+    consola.log(`classificationPrompt: \`${result.object.classificationPrompt}\`,`)
+    consola.log('```')
 
-  console.log('💡 Copy the above into your email-labeller.config.ts\n')
-}
+    consola.success('Copy the above into your email-labeller.config.ts')
+  },
+})
