@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v0.2.1-alpha.3
+
+[compare changes](https://github.com/onmax/email-labeller/compare/v0.2.1-alpha.2...v0.2.1-alpha.3)
+
+### 🏡 Chore
+
+- Fix lint ([ffa6f50](https://github.com/onmax/email-labeller/commit/ffa6f50))
+
+### ❤️ Contributors
+
+- Onmax <maximogarciamtnez@gmail.com>
+
 ## v0.2.1-alpha.2
 
 [compare changes](https://github.com/onmax/email-labeller/compare/v0.2.1-alpha.1...v0.2.1-alpha.2)
