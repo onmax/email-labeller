@@ -4,7 +4,7 @@ import type { EmailProvider } from '../interfaces/email-provider.js'
 import type { StateStore } from '../interfaces/state-store.js'
 import type { EmailSummary } from '../types/email.js'
 import type { CleanupResult, ProcessResult } from '../types/index.js'
-import { matchesFilter } from '../utils/filter.js'
+import { findMatchingRule, matchesFilter } from '../utils/filter.js'
 
 export interface EmailLabeller {
   processNewEmails: (options?: { maxResults?: number }) => Promise<ProcessResult>
@@ -32,7 +32,7 @@ export interface ProgressInfo {
   total: number
   email: { id: string, subject: string }
   labels?: string[]
-  status: 'processing' | 'labeled' | 'skipped' | 'trashed' | 'error'
+  status: 'processing' | 'labeled' | 'rule_matched' | 'skipped' | 'trashed' | 'error'
   error?: Error
 }
 
@@ -77,6 +77,15 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
     progress({ current: ctx.current, total: ctx.total, email, status: 'processing' })
 
     try {
+      const matchedRule = findMatchingRule(email, config.labelRules)
+      if (matchedRule) {
+        const appliedLabels = await applyLabels(email.id, matchedRule.labels, ctx.labelIdMap)
+        ctx.results.push({ emailId: email.id, labels: appliedLabels })
+        await stateStore.markProcessed([email.id])
+        progress({ current: ctx.current, total: ctx.total, email, labels: appliedLabels, status: 'rule_matched' })
+        return true
+      }
+
       const classification = await aiClassifier.classify(email, config.labels, config.classificationPrompt)
       const appliedLabels = await applyLabels(email.id, classification.labels, ctx.labelIdMap)
 

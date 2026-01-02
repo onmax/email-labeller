@@ -1,4 +1,4 @@
-import type { EmailFilter } from '../config/schema.js'
+import type { EmailFilter, LabelRule } from '../config/schema.js'
 import type { EmailSummary } from '../types/email.js'
 
 export function matchesFilter(email: EmailSummary, filter: EmailFilter): boolean {
@@ -25,4 +25,10 @@ export function matchesFilter(email: EmailSummary, filter: EmailFilter): boolean
     return false
 
   return true
+}
+
+export function findMatchingRule(email: EmailSummary, rules?: LabelRule[]): LabelRule | undefined {
+  if (!rules?.length)
+    return undefined
+  return rules.find(rule => matchesFilter(email, rule))
 }

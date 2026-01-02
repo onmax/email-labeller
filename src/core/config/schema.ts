@@ -29,10 +29,15 @@ export const emailFilterSchema = z.object({
   read: z.boolean().optional(),
 })
 
+export const labelRuleSchema = emailFilterSchema.extend({
+  labels: z.array(z.string()).min(1),
+})
+
 export const coreConfigSchema = z.object({
   labels: z.array(labelSchema).min(1),
   cleanupRules: z.array(cleanupRuleSchema).optional(),
   autoTrashRules: z.array(emailFilterSchema).optional(),
+  labelRules: z.array(labelRuleSchema).optional(),
   classificationPrompt: z.string().optional(),
 })
 
@@ -46,6 +51,7 @@ export interface CoreConfig {
   labels: LabelConfig[]
   cleanupRules?: CleanupRule[]
   autoTrashRules?: EmailFilter[]
+  labelRules?: LabelRule[]
   classificationPrompt?: string
 }
 
@@ -58,3 +64,4 @@ export interface Config<TModel = unknown> extends CoreConfig {
 export type LabelConfig = z.infer<typeof labelSchema>
 export type CleanupRule = z.infer<typeof cleanupRuleSchema>
 export type EmailFilter = z.infer<typeof emailFilterSchema>
+export type LabelRule = z.infer<typeof labelRuleSchema>
