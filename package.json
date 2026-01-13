@@ -1,7 +1,7 @@
 {
   "name": "email-labeller",
   "type": "module",
-  "version": "0.2.1-alpha.4",
+  "version": "0.2.1",
   "packageManager": "pnpm@10.0.0",
   "description": "AI-powered email classification for Gmail",
   "author": "onmax",
@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "ai": "^6.0.5",
+    "ai-sdk-provider-claude-code": "^3.0.1",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
     "google-auth-library": "^10.5.0",
