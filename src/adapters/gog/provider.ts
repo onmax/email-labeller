@@ -1,5 +1,5 @@
 import type { EmailProvider } from '../../core/interfaces/email-provider.js'
-import type { AppliedLabel, EmailSummary, GetEmailsOptions, LabelDefinition } from '../../core/types/index.js'
+import type { EmailSummary, GetEmailsOptions, LabelDefinition } from '../../core/types/index.js'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { ProviderError } from '../../core/errors.js'
