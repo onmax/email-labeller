@@ -97,8 +97,6 @@ export function createGogGmailProvider(config: GogGmailProviderConfig = {}): Ema
 
     async authenticate() {
       // gog manages auth externally.
-      // We keep this to satisfy the interface.
-      return
     },
 
     async listLabels() {

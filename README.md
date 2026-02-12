@@ -36,12 +36,14 @@ gog auth add you@gmail.com --services gmail
 2. In your `email-labeller.config.ts`, set:
 
 ```ts
-gmail: {
-  provider: 'gog',
-  // optional:
-  // account: 'you@gmail.com',
-  // client: 'default',
-},
+export default defineConfig({
+  gmail: {
+    provider: 'gog',
+    // optional:
+    // account: 'you@gmail.com',
+    // client: 'default',
+  },
+})
 ```
 
 ### 2. Create Configuration

@@ -64,7 +64,11 @@ export interface CoreConfig {
 }
 
 // Full config with provider settings (used by CLI)
-export type GmailProviderConfig = { provider: 'gog', account?: string, client?: string }
+export interface GmailProviderConfig {
+  provider: 'gog'
+  account?: string
+  client?: string
+}
 
 export interface Config<TModel = unknown> extends CoreConfig {
   model: TModel
