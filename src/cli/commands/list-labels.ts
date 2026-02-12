@@ -1,7 +1,6 @@
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
-import { createGmailProvider } from '../../adapters/gmail/index.js'
-import { loadTokens } from '../config.js'
+import { createEmailProvider } from '../config.js'
 import { loadConfig } from '../utils.js'
 
 const SYSTEM_LABELS = ['INBOX', 'SENT', 'DRAFT', 'TRASH', 'SPAM', 'STARRED', 'UNREAD', 'IMPORTANT', 'CHAT', 'YELLOW_STAR']
@@ -10,11 +9,7 @@ export default defineCommand({
   meta: { name: 'labels', description: 'List all Gmail labels' },
   async run() {
     const config = await loadConfig()
-    const tokens = loadTokens()
-    if (!tokens)
-      throw new Error('No tokens found. Run `email-labeller auth` first.')
-
-    const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    const emailProvider = createEmailProvider(config)
     const labels = await emailProvider.listLabels()
     const userLabels = labels.filter(l => !l.name.startsWith('CATEGORY_') && !SYSTEM_LABELS.includes(l.name))
 

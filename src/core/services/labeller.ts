@@ -77,6 +77,14 @@ export function createEmailLabeller(options: CreateEmailLabellerOptions): EmailL
     progress({ current: ctx.current, total: ctx.total, email, status: 'processing' })
 
     try {
+      // Some messages may have missing metadata (no From/Subject/Snippet). Skip them to avoid LLM parse failures.
+      const subjectEmpty = !email.subject || email.subject === '(no subject)'
+      if (!email.from && subjectEmpty && !email.snippet) {
+        await stateStore.markProcessed([email.id])
+        progress({ current: ctx.current, total: ctx.total, email, status: 'skipped' })
+        return true
+      }
+
       const matchedRule = findMatchingRule(email, config.labelRules)
       if (matchedRule) {
         const appliedLabels = await applyLabels(email.id, matchedRule.labels, ctx.labelIdMap)

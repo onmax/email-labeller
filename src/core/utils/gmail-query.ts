@@ -1,4 +1,4 @@
-import type { EmailFilter } from '../../core/index.js'
+import type { EmailFilter } from '../config/schema.js'
 
 export function parseSize(size: string): number {
   if (!size || typeof size !== 'string')
@@ -14,6 +14,7 @@ export function parseSize(size: string): number {
   return Math.floor(num * (unit ? (multipliers[unit] ?? 1) : 1))
 }
 
+// Gmail search syntax builder (used by remove/cleanup flows).
 export function buildGmailQuery(filter: EmailFilter): string {
   const parts: string[] = []
 

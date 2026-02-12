@@ -41,8 +41,6 @@
     "ai-sdk-provider-claude-code": "^3.0.1",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
-    "google-auth-library": "^10.5.0",
-    "googleapis": "^169.0.0",
     "pathe": "^2.0.3",
     "zod": "^3.25.76"
   },

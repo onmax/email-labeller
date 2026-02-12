@@ -41,9 +41,17 @@ export const coreConfigSchema = z.object({
   classificationPrompt: z.string().optional(),
 })
 
+// Gmail access for this project.
+// We intentionally keep this simple (no legacy OAuth tokens.json flow).
+export const gmailProviderSchema = z.object({
+  provider: z.literal('gog'),
+  account: z.string().optional(),
+  client: z.string().optional(),
+})
+
 export const configSchema = coreConfigSchema.extend({
   model: z.unknown(),
-  gmail: z.object({ clientId: z.string(), clientSecret: z.string() }),
+  gmail: gmailProviderSchema,
 })
 
 // Core config - provider-agnostic
@@ -56,9 +64,11 @@ export interface CoreConfig {
 }
 
 // Full config with provider settings (used by CLI)
+export type GmailProviderConfig = { provider: 'gog', account?: string, client?: string }
+
 export interface Config<TModel = unknown> extends CoreConfig {
   model: TModel
-  gmail: { clientId: string, clientSecret: string }
+  gmail: GmailProviderConfig
 }
 
 export type LabelConfig = z.infer<typeof labelSchema>

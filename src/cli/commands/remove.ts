@@ -1,9 +1,8 @@
 import type { EmailFilter } from '../../core/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
-import { buildGmailQuery, createGmailProvider } from '../../adapters/gmail/index.js'
-import { AuthError } from '../../core/index.js'
-import { loadTokens } from '../config.js'
+import { buildGmailQuery } from '../../core/index.js'
+import { createEmailProvider } from '../config.js'
 import { loadConfig } from '../utils.js'
 
 export default defineCommand({
@@ -21,9 +20,6 @@ export default defineCommand({
   },
   async run({ args }) {
     const config = await loadConfig()
-    const tokens = loadTokens()
-    if (!tokens)
-      throw new AuthError('No tokens found. Run `email-labeller auth` first.')
 
     const filter: EmailFilter = {}
     if (args['older-than'])
@@ -42,7 +38,7 @@ export default defineCommand({
       filter.read = true
 
     const limit = Number.parseInt(args.limit)
-    const provider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    const provider = createEmailProvider(config)
     const query = buildGmailQuery(filter)
 
     consola.info(`Query: ${query}`)

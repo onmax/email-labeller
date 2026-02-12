@@ -2,15 +2,16 @@ import { claudeCode } from 'ai-sdk-provider-claude-code'
 import { defineConfig } from 'email-labeller'
 
 // Uses your Claude Code subscription - no API key needed!
-// Other providers: @ai-sdk/google, @ai-sdk/anthropic, @ai-sdk/openai
 
 export default defineConfig({
   model: claudeCode('haiku'),
 
-  // Gmail OAuth credentials from Google Cloud Console
+  // Gmail access via `gog` (OAuth handled by gog on the machine)
   gmail: {
-    clientId: 'your-client-id.apps.googleusercontent.com',
-    clientSecret: 'your-client-secret',
+    provider: 'gog',
+    // optional:
+    // account: 'you@gmail.com',
+    // client: 'default',
   },
 
   labels: [
