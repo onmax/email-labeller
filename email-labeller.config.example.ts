@@ -2,26 +2,17 @@ import { claudeCode } from 'ai-sdk-provider-claude-code'
 import { defineConfig } from 'email-labeller'
 
 // Uses your Claude Code subscription - no API key needed!
-// Other providers: @ai-sdk/google, @ai-sdk/anthropic, @ai-sdk/openai
 
 export default defineConfig({
   model: claudeCode('haiku'),
 
-  // Gmail access
-  // Recommended: use `gog` (auth handled by gog on the machine)
+  // Gmail access via `gog` (OAuth handled by gog on the machine)
   gmail: {
     provider: 'gog',
     // optional:
     // account: 'you@gmail.com',
     // client: 'default',
   },
-
-  // Legacy Google OAuth (requires `npx email-labeller auth` to create tokens.json)
-  // gmail: {
-  //   provider: 'googleapis',
-  //   clientId: 'your-client-id.apps.googleusercontent.com',
-  //   clientSecret: 'your-client-secret',
-  // },
 
   labels: [
     { name: 'Work', color: { backgroundColor: '#fad165', textColor: '#000000' }, description: 'Job-related emails' },

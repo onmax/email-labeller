@@ -22,15 +22,11 @@ npm install email-labeller ai-sdk-provider-claude-code
 
 ## Setup
 
-### 1. Gmail access
+### 1. Gmail access (via `gog`)
 
-You can use one of these methods:
+This project uses the `gog` CLI for Gmail access. `gog` manages Gmail OAuth on the machine.
 
-#### Option A (recommended for local/servers): use `gog`
-
-This avoids building Gmail OAuth into this project. `gog` manages Gmail OAuth on the machine.
-
-1. Install and authenticate gog:
+1. Authenticate gog:
 
 ```bash
 gog auth credentials /path/to/client_secret.json
@@ -48,15 +44,6 @@ gmail: {
 },
 ```
 
-#### Option B: Gmail OAuth (legacy)
-
-You need OAuth credentials to access your Gmail account:
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a project and enable the Gmail API
-3. Navigate to Credentials → Create OAuth 2.0 Client ID (Desktop app)
-4. Copy the `client_id` and `client_secret`
-
 ### 2. Create Configuration
 
 Create a file named `email-labeller.config.ts` in your project directory:
@@ -70,10 +57,9 @@ export default defineConfig({
 
   gmail: {
     provider: 'gog',
-    // or (legacy google OAuth):
-    // provider: 'googleapis',
-    // clientId: 'your-client-id.apps.googleusercontent.com',
-    // clientSecret: 'your-client-secret',
+    // optional:
+    // account: 'you@gmail.com',
+    // client: 'default',
   },
 
   labels: [
@@ -103,15 +89,13 @@ export default defineConfig({
 
 ### 3. Authenticate and Run
 
-If you're using **legacy Google OAuth**, run the authentication flow:
+Authenticate with Gmail via gog:
 
 ```bash
 npx email-labeller auth
 ```
 
-This opens your browser for OAuth authorization and creates `tokens.json` with your credentials. Add this file to `.gitignore` to avoid leaking credentials.
-
-If you're using **gog**, you do not need `tokens.json` (gog handles auth).
+This command prints the gog steps. No `tokens.json` is used (gog handles auth).
 After authenticating, process your emails. The CLI creates `state.json` to track processed email IDs:
 
 ```bash

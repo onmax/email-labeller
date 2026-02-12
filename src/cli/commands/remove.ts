@@ -1,7 +1,7 @@
 import type { EmailFilter } from '../../core/index.js'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
-import { buildGmailQuery } from '../../adapters/gmail/index.js'
+import { buildGmailQuery } from '../../core/index.js'
 import { createEmailProvider } from '../config.js'
 import { loadConfig } from '../utils.js'
 

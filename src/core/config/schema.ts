@@ -41,16 +41,13 @@ export const coreConfigSchema = z.object({
   classificationPrompt: z.string().optional(),
 })
 
-export const gmailProviderSchema = z.union([
-  // Backwards-compatible default (Google OAuth tokens.json)
-  z.object({ clientId: z.string(), clientSecret: z.string() }).transform(v => ({ provider: 'googleapis' as const, ...v })),
-
-  // Explicit googleapis provider (same as above)
-  z.object({ provider: z.literal('googleapis'), clientId: z.string(), clientSecret: z.string() }),
-
-  // Use `gog` for Gmail access (OAuth handled by gog)
-  z.object({ provider: z.literal('gog'), account: z.string().optional(), client: z.string().optional() }),
-])
+// Gmail access for this project.
+// We intentionally keep this simple (no legacy OAuth tokens.json flow).
+export const gmailProviderSchema = z.object({
+  provider: z.literal('gog'),
+  account: z.string().optional(),
+  client: z.string().optional(),
+})
 
 export const configSchema = coreConfigSchema.extend({
   model: z.unknown(),
@@ -67,9 +64,7 @@ export interface CoreConfig {
 }
 
 // Full config with provider settings (used by CLI)
-export type GmailProviderConfig =
-  | { provider: 'googleapis', clientId: string, clientSecret: string }
-  | { provider: 'gog', account?: string, client?: string }
+export type GmailProviderConfig = { provider: 'gog', account?: string, client?: string }
 
 export interface Config<TModel = unknown> extends CoreConfig {
   model: TModel
