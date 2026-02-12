@@ -9,6 +9,16 @@ export default defineCommand({
   async run() {
     const config = await loadConfig()
 
+    if (config.gmail.provider === 'gog') {
+      consola.info('This project is configured to use `gog` for Gmail access.')
+      consola.info('Authenticate using gog (one-time):')
+      consola.log('\n  gog auth credentials /path/to/client_secret.json')
+      consola.log('  gog auth add you@gmail.com --services gmail')
+      consola.log('\nThen re-run:')
+      consola.log('  npx email-labeller')
+      return
+    }
+
     const provider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret })
     const authUrl = provider.getAuthUrl!()
 

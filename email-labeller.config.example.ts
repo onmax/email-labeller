@@ -7,11 +7,21 @@ import { defineConfig } from 'email-labeller'
 export default defineConfig({
   model: claudeCode('haiku'),
 
-  // Gmail OAuth credentials from Google Cloud Console
+  // Gmail access
+  // Recommended: use `gog` (auth handled by gog on the machine)
   gmail: {
-    clientId: 'your-client-id.apps.googleusercontent.com',
-    clientSecret: 'your-client-secret',
+    provider: 'gog',
+    // optional:
+    // account: 'you@gmail.com',
+    // client: 'default',
   },
+
+  // Legacy Google OAuth (requires `npx email-labeller auth` to create tokens.json)
+  // gmail: {
+  //   provider: 'googleapis',
+  //   clientId: 'your-client-id.apps.googleusercontent.com',
+  //   clientSecret: 'your-client-secret',
+  // },
 
   labels: [
     { name: 'Work', color: { backgroundColor: '#fad165', textColor: '#000000' }, description: 'Job-related emails' },

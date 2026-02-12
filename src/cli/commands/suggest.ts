@@ -1,11 +1,9 @@
 import type { EmailSummary } from '../../core/index.js'
-import { readFileSync } from 'node:fs'
 import { generateObject } from 'ai'
 import { defineCommand } from 'citty'
 import { consola } from 'consola'
 import { z } from 'zod'
-import { createGmailProvider } from '../../adapters/gmail/index.js'
-import { getTokensPath } from '../config.js'
+import { createEmailProvider } from '../config.js'
 import { loadConfig } from '../utils.js'
 
 const SuggestedConfigSchema = z.object({
@@ -37,8 +35,7 @@ export default defineCommand({
     const config = await loadConfig()
     const maxEmails = Number.parseInt(args.max)
 
-    const tokens = JSON.parse(readFileSync(getTokensPath(), 'utf-8'))
-    const emailProvider = createGmailProvider({ clientId: config.gmail.clientId, clientSecret: config.gmail.clientSecret, tokens })
+    const emailProvider = createEmailProvider(config)
 
     consola.start(`Fetching last ${maxEmails} emails...`)
     const emails = await emailProvider.getEmails({ maxResults: maxEmails, query: 'in:inbox' })
